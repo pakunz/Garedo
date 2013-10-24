@@ -37,8 +37,8 @@ public class User implements Serializable, IsSerializable {
 	@OneToOne(cascade = CascadeType.ALL)
 	private Profile profile;
 	
-	@ManyToMany(cascade = CascadeType.PERSIST)
-	private Set<Project> projects;
+//	@ManyToMany(cascade = CascadeType.PERSIST)
+//	private Set<Project> projects;
 	
 	//--------------//
 	// Constructors //
@@ -46,7 +46,7 @@ public class User implements Serializable, IsSerializable {
 	
 	public User() {
 		super();
-		this.projects = new HashSet<Project>();
+//		this.projects = new HashSet<Project>();
 	}
 
 	public User(String name) {
@@ -78,22 +78,22 @@ public class User implements Serializable, IsSerializable {
 		return id;
 	}
 
-	public Set<Project> getProjects() {
-		return projects;
-	}
+//	public Set<Project> getProjects() {
+//		return projects;
+//	}
 	
-	public void addProject(Project project) {
-		this.projects.add(project);
-		if(!project.getUsers().contains(this)) {
-			project.addUser(this);
-		}
-	}
+//	public void addProject(Project project) {
+//		this.projects.add(project);
+//		if(!project.getUsers().contains(this)) {
+//			project.addUser(this);
+//		}
+//	}
 	
-	public void removeProject(Project project) {
-		this.projects.remove(project);
-		if(project.getUsers().contains(this)) {
-			project.removeUser(this);
-		}
-	}
+//	public void removeProject(Project project) {
+//		this.projects.remove(project);
+//		if(project.getUsers().contains(this)) {
+//			project.removeUser(this);
+//		}
+//	}
 	
 }
