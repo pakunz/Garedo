@@ -6,6 +6,8 @@ import java.util.List;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.Profile;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.User;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.DTO.UserDTO;
+import de.uni_mannheim.bwl.schader.odm.garedo.client.services.ProjectService;
+import de.uni_mannheim.bwl.schader.odm.garedo.client.services.ProjectServiceAsync;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserServiceAsync;
 import de.uni_mannheim.bwl.schader.odm.garedo.shared.FieldVerifier;
@@ -43,8 +45,8 @@ public class GaredoPCR implements EntryPoint {
 	/**
 	 * Create a remote service proxy to talk to the server-side Greeting service.
 	 */
-	private final UserServiceAsync userService = GWT
-			.create(UserService.class);
+	private final UserServiceAsync userService = GWT.create(UserService.class);
+	private final ProjectServiceAsync projectService = GWT.create(ProjectService.class);
 
 	private UserDTO currentUserDTO;
 	private Profile currentProfile;

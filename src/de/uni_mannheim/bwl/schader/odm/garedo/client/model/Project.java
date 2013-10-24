@@ -20,6 +20,10 @@ import java.util.Set;
 import java.util.HashSet;
 
 @Entity
+@NamedQuery(
+	name = "getProjectByName",
+	query = "SELECT p FROM Project p WHERE p.name = :name"
+)
 public class Project implements Serializable, IsSerializable  {
 
 	private static final long serialVersionUID = 13L;

@@ -1,10 +1,13 @@
 package de.uni_mannheim.bwl.schader.odm.garedo.client.services;
 
+import java.util.Set;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.Profile;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.User;
+import de.uni_mannheim.bwl.schader.odm.garedo.client.model.DTO.ProjectDTO;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.DTO.UserDTO;
 
 /**
@@ -35,5 +38,12 @@ public interface UserService extends RemoteService {
 	Profile loadProfile(int id) throws IllegalArgumentException;
 	
 	void updateProfile(Profile profile) throws IllegalArgumentException;
+	
+	//--------------//
+	// Project CR   //
+	//--------------//
+	void addProject(int userId, int projectId) throws IllegalArgumentException;
+	
+	Set<ProjectDTO> loadProjects(int userId) throws IllegalArgumentException;
 	
 }

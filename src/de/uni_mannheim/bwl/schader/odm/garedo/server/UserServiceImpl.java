@@ -1,5 +1,8 @@
 package de.uni_mannheim.bwl.schader.odm.garedo.server;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -9,7 +12,9 @@ import javax.persistence.TypedQuery;
 import org.eclipse.persistence.exceptions.DatabaseException;
 
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.Profile;
+import de.uni_mannheim.bwl.schader.odm.garedo.client.model.Project;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.User;
+import de.uni_mannheim.bwl.schader.odm.garedo.client.model.DTO.ProjectDTO;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.DTO.UserDTO;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService;
 import de.uni_mannheim.bwl.schader.odm.garedo.shared.FieldVerifier;
@@ -156,6 +161,45 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 		} finally {
 			em.close();
 		}
+	}
+	
+	//--------------//
+	// Project CR   //
+	//--------------//
+	public void addProject(int userId, int projectId) throws IllegalArgumentException {
+		EntityManager em = EMFHelper.getFactory().createEntityManager();
+		EntityTransaction tx = em.getTransaction();
+		
+		User user = em.find(User.class, userId);
+		Project project = em.find(Project.class, projectId);
+		if(user == null || project == null) {
+			//TODO: improve exception handling
+			throw new IllegalArgumentException("ERROR: Either user id or project id wrong");
+		} else {
+			
+			try {
+				tx.begin();
+				user.addProject(project);
+				em.persist(user);
+				tx.commit();
+			} catch(EntityExistsException e) {
+				//TODO: improve exception handling
+				tx.rollback();
+				throw e;
+			} finally {
+				em.close();
+			}
+			
+		}
+	}
+	
+	public Set<ProjectDTO> loadProjects(int userId) throws IllegalArgumentException {
+		Set<ProjectDTO> projectSet = new HashSet<ProjectDTO>();
+		User user = getUserById(userId);
+		for(Project project : user.getProjects()) {
+			projectSet.add(new ProjectDTO(project));
+		}
+		return projectSet;
 	}
 	
 	//-------------------//

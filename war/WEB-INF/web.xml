@@ -7,13 +7,23 @@
 
   <!-- Servlets -->
   <servlet>
-    <servlet-name>greetServlet</servlet-name>
+    <servlet-name>userServlet</servlet-name>
     <servlet-class>de.uni_mannheim.bwl.schader.odm.garedo.server.UserServiceImpl</servlet-class>
   </servlet>
   
   <servlet-mapping>
-    <servlet-name>greetServlet</servlet-name>
+    <servlet-name>userServlet</servlet-name>
     <url-pattern>/garedopcr/user</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <servlet-name>projectServlet</servlet-name>
+    <servlet-class>de.uni_mannheim.bwl.schader.odm.garedo.server.ProjectServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>projectServlet</servlet-name>
+    <url-pattern>/garedopcr/project</url-pattern>
   </servlet-mapping>
   
   <!-- Default page to serve -->
