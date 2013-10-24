@@ -1,2 +1,3 @@
 # Module garedopcr
 # RPC service class, partial path of RPC policy file
+de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService, 1FD6FF24101622409FA429052CC86BF9.gwt.rpc

@@ -1,5 +1,11 @@
 package de.uni_mannheim.bwl.schader.odm.garedo.server;
 
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.User;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService;
 import de.uni_mannheim.bwl.schader.odm.garedo.shared.FieldVerifier;
@@ -34,24 +40,85 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 //	}
 	
 	public User loadUser(String name) throws IllegalArgumentException {
-		//TODO
-		User user = null;
+		User user = getUserByName(name);
+		if(user == null) {
+			//TODO: use specific exception
+			throw new IllegalArgumentException("ERROR: user does not exist");
+		}
 		return user;
 	}
 	
 	public User createUser(String name) throws IllegalArgumentException {
-		//TODO
 		User user = null;
+		
+		EntityManager em = EMFHelper.getFactory().createEntityManager();
+		EntityTransaction tx = em.getTransaction();
+		
+		try {
+			tx.begin();
+			user = new User(name);
+			em.persist(user);
+			tx.commit();
+		} catch(EntityExistsException e) {
+			//TODO: improve exception handling
+			tx.rollback();
+			throw e;
+		} finally {
+			em.close();
+		}
+		
 		return user;
 	}
 	
 	public void updateUser(User user) throws IllegalArgumentException {
-		//TODO
+		EntityManager em = EMFHelper.getFactory().createEntityManager();
+		EntityTransaction tx = em.getTransaction();
+		
+		try {
+			tx.begin();
+			em.persist(user);
+			tx.commit();
+		} catch(EntityExistsException e) {
+			//TODO: improve exception handling
+			tx.rollback();
+			throw e;
+		} finally {
+			em.close();
+		}
 	}
 	
 	public void deleteUser(User user) throws IllegalArgumentException {
-		//TODO
+		EntityManager em = EMFHelper.getFactory().createEntityManager();
+		EntityTransaction tx = em.getTransaction();
+		
+		try {
+			tx.begin();
+			user = em.merge(user);
+			em.remove(user);
+			tx.commit();
+		} catch(EntityExistsException e) {
+			//TODO: improve exception handling
+			tx.rollback();
+			throw e;
+		} finally {
+			em.close();
+		}
 	}
+	
+	private User getUserByName(String name) {
+		User user = null;
+		EntityManager em = EMFHelper.getFactory().createEntityManager();
+		TypedQuery<User> query = em.createNamedQuery("getUserByName",User.class);
+		query.setParameter("name", name);
+		try {
+			user = query.getSingleResult();
+		} catch(NoResultException e) {
+			// allright, no result, return null
+		} finally {
+			em.close();
+		}
+		return user;
+	}	
 
 //	/**
 //	 * Escape an html string. Escaping data received from the client helps to
