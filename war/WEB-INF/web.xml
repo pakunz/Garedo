@@ -8,7 +8,7 @@
   <!-- Servlets -->
   <servlet>
     <servlet-name>greetServlet</servlet-name>
-    <servlet-class>de.uni_mannheim.bwl.schader.odm.garedo.server.GreetingServiceImpl</servlet-class>
+    <servlet-class>de.uni_mannheim.bwl.schader.odm.garedo.server.UserServiceImpl</servlet-class>
   </servlet>
   
   <servlet-mapping>

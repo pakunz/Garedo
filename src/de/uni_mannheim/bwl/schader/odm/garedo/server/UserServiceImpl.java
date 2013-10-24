@@ -1,15 +1,16 @@
 package de.uni_mannheim.bwl.schader.odm.garedo.server;
 
-import de.uni_mannheim.bwl.schader.odm.garedo.client.GreetingService;
+import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService;
 import de.uni_mannheim.bwl.schader.odm.garedo.shared.FieldVerifier;
+
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
  * The server side implementation of the RPC service.
  */
 @SuppressWarnings("serial")
-public class GreetingServiceImpl extends RemoteServiceServlet implements
-		GreetingService {
+public class UserServiceImpl extends RemoteServiceServlet implements
+		UserService {
 
 	public String greetServer(String input) throws IllegalArgumentException {
 		// Verify that the input is valid. 

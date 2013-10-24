@@ -1,6 +1,9 @@
 package de.uni_mannheim.bwl.schader.odm.garedo.client;
 
+import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService;
+import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserServiceAsync;
 import de.uni_mannheim.bwl.schader.odm.garedo.shared.FieldVerifier;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,8 +35,8 @@ public class GaredoPCR implements EntryPoint {
 	/**
 	 * Create a remote service proxy to talk to the server-side Greeting service.
 	 */
-	private final GreetingServiceAsync greetingService = GWT
-			.create(GreetingService.class);
+	private final UserServiceAsync greetingService = GWT
+			.create(UserService.class);
 
 	/**
 	 * This is the entry point method.
