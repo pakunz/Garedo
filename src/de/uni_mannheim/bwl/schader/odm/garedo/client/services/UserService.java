@@ -44,6 +44,8 @@ public interface UserService extends RemoteService {
 	//--------------//
 	void addProject(int userId, int projectId) throws IllegalArgumentException;
 	
+	Set<ProjectDTO> loadProjects() throws IllegalArgumentException;
+	
 	Set<ProjectDTO> loadProjects(int userId) throws IllegalArgumentException;
 	
 }

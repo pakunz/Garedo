@@ -2,9 +2,11 @@ package de.uni_mannheim.bwl.schader.odm.garedo.client;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Set;
 
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.Profile;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.User;
+import de.uni_mannheim.bwl.schader.odm.garedo.client.model.DTO.ProjectDTO;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.DTO.UserDTO;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.ProjectService;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.ProjectServiceAsync;
@@ -50,12 +52,14 @@ public class GaredoPCR implements EntryPoint {
 
 	private UserDTO currentUserDTO;
 	private Profile currentProfile;
+	private Set<ProjectDTO> currentProjectDTOs;
 	
 	final Label errorLabel = new Label();
 	private final HorizontalPanel dashboardPanel = new HorizontalPanel();
 	private final VerticalPanel profilePanel = new VerticalPanel();
     private final VerticalPanel projectPanel = new VerticalPanel();
-	
+    private final Grid projectGrid = new Grid(0,2);
+    
 	/**
 	 * This is the entry point method.
 	 */
@@ -63,6 +67,10 @@ public class GaredoPCR implements EntryPoint {
 		loadLogin();
 	}
 	
+	
+	//------------------//
+	// LOGIN AND SIGNUP //
+	//------------------//
 	private void loadLogin() {
 		
 		final Button loginButton = new Button("Log In");
@@ -206,6 +214,7 @@ public class GaredoPCR implements EntryPoint {
 						new AsyncCallback<Integer>() {
 					
 							public void onFailure(Throwable caught) {
+								//TODO: error handling
 								errorLabel.setText(caught.getMessage());
 							}
 
@@ -227,6 +236,9 @@ public class GaredoPCR implements EntryPoint {
 	}
 	
 	
+	//-----------//
+	// DASHBOARD //
+	//-----------//
 	private void loadDashboard() {
 		
 	    RootPanel.get().clear();
@@ -240,6 +252,7 @@ public class GaredoPCR implements EntryPoint {
 	    		new AsyncCallback<Profile>() {
 			
 			public void onFailure(Throwable caught) {
+				//TODO: error handling
 				errorLabel.setText(caught.getMessage());
 			}
 
@@ -250,23 +263,40 @@ public class GaredoPCR implements EntryPoint {
 			}
 		});
 	    
-	    addProjectInformation();
+	    userService.loadProjects(
+	    		new AsyncCallback<Set<ProjectDTO>>() {
+			
+			public void onFailure(Throwable caught) {
+				//TODO: error handling
+				errorLabel.setText(caught.getMessage());
+			}
+
+			public void onSuccess(Set<ProjectDTO> projectDTOs) {
+				currentProjectDTOs = projectDTOs;
+				addProjectInformation();
+			}
+		});
 	    
 //	    userService.loadProjects(currentUserDTO.getId(),
-//	    		new AsyncCallback<Profile>() {
+//	    		new AsyncCallback<Set<ProjectDTO>>() {
 //			
 //			public void onFailure(Throwable caught) {
-//				//errorLabel.setText(caught.getMessage());
+//				//TODO: error handling
+//				errorLabel.setText(caught.getMessage());
 //			}
 //
-//			public void onSuccess(Profile profile) {
-//				// not null
-//				addProfileInformation(profile);
+//			public void onSuccess(Set<ProjectDTO> projectDTOs) {
+//				currentProjectDTOs = projectDTOs;
+//				addProjectInformation();
 //			}
 //		});
 	    
 	}
 	
+	
+	//---------//
+	// PROFILE //
+	//---------//
 	private void addProfileInformation() {
 	    
 	    final Label profileLabel = new Label("Profile:");
@@ -339,6 +369,7 @@ public class GaredoPCR implements EntryPoint {
 		
 		final Label addQualificationLabel = new Label("Qualification:");
 		final TextBox addQualificationField = new TextBox();
+		addQualificationField.setText("");
 		VerticalPanel addQualificationBoxPanel = new VerticalPanel();
 		addQualificationBoxPanel.addStyleName("addQualificationBoxPanel");
 		addQualificationBoxPanel.add(addQualificationLabel);
@@ -390,9 +421,147 @@ public class GaredoPCR implements EntryPoint {
 		
 	}
 	
+	
+	
+	//----------//
+	// PROJECTS //
+	//----------//
 	private void addProjectInformation() {
 		final Label projectsLabel = new Label("Projects:");
 	    projectPanel.add(projectsLabel);
+	    
+	    final Button showAddProjectButton = new Button("New Project");
+	    projectPanel.add(showAddProjectButton);
+	    
+	    projectGrid.resizeRows(currentProjectDTOs.size()+1);
+	    projectGrid.setText(0,0,"Project Name: ");
+	    projectGrid.setText(0,1,"Assigned: ");
+	    
+	    int userId = currentUserDTO.getId();
+	    
+	    int i=1;
+	    for(ProjectDTO projectDTO : currentProjectDTOs) {
+	    	boolean assigned = projectDTO.getUserIds().contains(userId);
+	    	insertProjectGridRow(i, projectDTO, assigned);
+	    	i++;
+	    }
+	    projectPanel.add(projectGrid);
+
+	    
+	    // ADD PROJECT POPUP
+ 		final DialogBox addProjectBox = new DialogBox();
+ 		addProjectBox.setText("Add Project");
+ 		addProjectBox.setAnimationEnabled(true);
+ 		
+ 		final Button addProjectButton = new Button("Add");
+ 		addProjectButton.getElement().setId("addProjectButton");
+ 		
+ 		final Label addProjectLabel = new Label("Project Name:");
+ 		final TextBox addProjectField = new TextBox();
+ 		addProjectField.setText("");
+ 		VerticalPanel addProjectBoxPanel = new VerticalPanel();
+ 		addProjectBoxPanel.addStyleName("addProjectBoxPanel");
+ 		addProjectBoxPanel.add(addProjectLabel);
+ 		addProjectBoxPanel.add(addProjectField);
+ 		addProjectBoxPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+ 		addProjectBoxPanel.add(addProjectButton);
+ 		addProjectBox.setWidget(addProjectBoxPanel);
+
+ 		class AddProjectHandler implements ClickHandler {
+  			public void onClick(ClickEvent event) {
+  				addProject();
+  			}
+
+  			private void addProject() {
+  				final String projectName = addProjectField.getText();
+  				
+  				projectService.createProject(projectName, 
+  						new AsyncCallback<Integer>() {
+ 					
+						public void onFailure(Throwable caught) {
+							//TODO: error handling
+							errorLabel.setText(caught.getMessage());
+						}
+
+						public void onSuccess(Integer id) {
+							ProjectDTO projectDTO = new ProjectDTO();
+			  				projectDTO.setId(id);
+			  				projectDTO.setName(projectName);
+			  				updateProjectGrid(projectDTO);
+			  				addProjectBox.hide();
+							errorLabel.setText("SUCCESS! Added project with id: " + id);
+						}
+				});
+  				
+  			}
+  			
+  			private void updateProjectGrid(ProjectDTO projectDTO) {
+  				int rowCount = projectGrid.getRowCount();
+  				projectGrid.resizeRows(rowCount + 1);
+  				insertProjectGridRow(rowCount, projectDTO, false);  				
+  			}
+  			
+  		}
+ 		
+ 		AddProjectHandler addProjectHandler = new AddProjectHandler();
+ 		addProjectButton.addClickHandler(addProjectHandler);
+    
+	    class ShowAddProjectHandler implements ClickHandler {
+ 			public void onClick(ClickEvent event) {
+ 				showAddProject();
+ 			}
+
+ 			private void showAddProject() {
+ 				addProjectBox.setText("Add Project");
+				addProjectBox.center();
+				addProjectButton.setFocus(true);
+ 			}
+ 			
+ 		}
+ 		
+	    ShowAddProjectHandler showAddProjectHandler = new ShowAddProjectHandler();
+		showAddProjectButton.addClickHandler(showAddProjectHandler);
+	
+	}
+	
+	// PRIVATE HELPER METHOD FOR PROJECT GRID
+	private void insertProjectGridRow(int row, ProjectDTO projectDTO, boolean assigned) {
+		
+		final int userId = currentUserDTO.getId();
+		final int currentIndex = row;
+		final int currentProjectId = projectDTO.getId();
+		
+		projectGrid.setText(currentIndex, 0, projectDTO.getName());
+		
+    	if(assigned) {
+    		projectGrid.setText(currentIndex, 1, "Yes");
+    	} else {
+    		final Button currentAddProjectButton = new Button("Add");
+    		projectGrid.setWidget(currentIndex, 1, currentAddProjectButton);
+
+    		currentAddProjectButton.addClickHandler(new ClickHandler() {
+    			
+    			public void onClick(ClickEvent event) {
+    				
+    				userService.addProject(userId, currentProjectId, 
+    						new AsyncCallback<Void>() {
+	     					
+ 							public void onFailure(Throwable caught) {
+ 								//TODO: error handling
+ 								errorLabel.setText(caught.getMessage());
+ 							}
+
+ 							public void onSuccess(Void empty) {
+ 								projectGrid.setText(currentIndex, 1, "Yes");
+ 								errorLabel.setText("SUCCESS! Added project with id: " + currentProjectId + " to user with id " + userId);
+ 							}
+						});
+    				
+    			}
+    			
+    		});
+    	}
+		
 	}
 	
 }

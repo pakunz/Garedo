@@ -1,6 +1,7 @@
 package de.uni_mannheim.bwl.schader.odm.garedo.server;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.EntityExistsException;
@@ -193,6 +194,11 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 		}
 	}
 	
+	public Set<ProjectDTO> loadProjects() throws IllegalArgumentException {
+		//TODO: consistent implementation with try/catch/...
+		return getAllProjects();
+	}
+	
 	public Set<ProjectDTO> loadProjects(int userId) throws IllegalArgumentException {
 		Set<ProjectDTO> projectSet = new HashSet<ProjectDTO>();
 		User user = getUserById(userId);
@@ -252,6 +258,24 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 			em.close();
 		}
 		return profile;
+	}
+		
+	private Set<ProjectDTO> getAllProjects() {
+		Set<ProjectDTO> projectDTOs = new HashSet<ProjectDTO>();
+		EntityManager em = EMFHelper.getFactory().createEntityManager();
+		TypedQuery<Project> query = em.createNamedQuery("getAllProjects",Project.class);
+		try {
+			List<Project> projectList = query.getResultList();
+			for(Project project : projectList) {
+				projectDTOs.add(new ProjectDTO(project));
+			}
+		} catch(NoResultException e) {
+			//TODO: maybe improve exception handling
+			throw e;
+		} finally {
+			em.close();
+		}
+		return projectDTOs;
 	}
 	
 }

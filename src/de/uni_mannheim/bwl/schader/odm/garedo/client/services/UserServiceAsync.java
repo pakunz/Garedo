@@ -50,6 +50,9 @@ public interface UserServiceAsync {
 	void addProject(int userId, int projectId, AsyncCallback<Void> callback)
 			throws IllegalArgumentException;
 	
+	void loadProjects(AsyncCallback<Set<ProjectDTO>> callback)
+			throws IllegalArgumentException;
+	
 	void loadProjects(int userId, AsyncCallback<Set<ProjectDTO>> callback)
 			throws IllegalArgumentException;
 	

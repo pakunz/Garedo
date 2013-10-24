@@ -1,0 +1,2 @@
+serviceClass: de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService
+path: 1C61D97AF83B97335243C04CB8B6EA11.gwt.rpc
