@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 
@@ -20,10 +21,16 @@ import java.util.Set;
 import java.util.HashSet;
 
 @Entity
-@NamedQuery(
-	name = "getUserByName",
-	query = "SELECT u FROM User u WHERE u.name = :name"
-)
+@NamedQueries({
+	@NamedQuery(
+		name = "getUserById",
+		query = "SELECT u FROM User u WHERE u.id = :id"
+	),
+	@NamedQuery(
+		name = "getUserByName",
+		query = "SELECT u FROM User u WHERE u.name = :name"
+	)
+})
 public class User implements Serializable, IsSerializable {
 
 	private static final long serialVersionUID = 42L;

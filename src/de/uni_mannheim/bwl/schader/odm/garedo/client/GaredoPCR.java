@@ -1,9 +1,11 @@
 package de.uni_mannheim.bwl.schader.odm.garedo.client;
 
+import java.sql.Date;
 import java.util.List;
 
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.Profile;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.User;
+import de.uni_mannheim.bwl.schader.odm.garedo.client.model.DTO.UserDTO;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserServiceAsync;
 import de.uni_mannheim.bwl.schader.odm.garedo.shared.FieldVerifier;
@@ -44,13 +46,18 @@ public class GaredoPCR implements EntryPoint {
 	private final UserServiceAsync userService = GWT
 			.create(UserService.class);
 
-	private User currentUser;
+	private UserDTO currentUserDTO;
+	private Profile currentProfile;
+	
+	final Label errorLabel = new Label();
+	private final HorizontalPanel dashboardPanel = new HorizontalPanel();
+	private final VerticalPanel profilePanel = new VerticalPanel();
+    private final VerticalPanel projectPanel = new VerticalPanel();
 	
 	/**
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
-		currentUser = null;
 		loadLogin();
 	}
 	
@@ -63,8 +70,6 @@ public class GaredoPCR implements EntryPoint {
 		final Button signupButton = new Button("Sign Up");
 		final TextBox signupField = new TextBox();
 		signupField.setText("");
-		
-		final Label errorLabel = new Label();
 		
 		// We can add style names to widgets
 		loginButton.addStyleName("sendButton");
@@ -147,7 +152,7 @@ public class GaredoPCR implements EntryPoint {
 //				serverResponseLabel.setText("");
 				
 				userService.loadUser(textToServer,
-						new AsyncCallback<User>() {
+						new AsyncCallback<UserDTO>() {
 					
 							public void onFailure(Throwable caught) {
 								// Show the RPC error message to the user
@@ -161,15 +166,15 @@ public class GaredoPCR implements EntryPoint {
 								errorLabel.setText(caught.getMessage());
 							}
 
-							public void onSuccess(User user) {
+							public void onSuccess(UserDTO userDTO) {
 //								dialogBox.setText("Remote Procedure Call");
 //								serverResponseLabel
 //										.removeStyleName("serverResponseLabelError");
 //								serverResponseLabel.setHTML(user.getName());
 //								dialogBox.center();
 //								closeButton.setFocus(true);
-								errorLabel.setText("SUCCESS! Logged on as " + user.getName());
-								currentUser = user;
+								errorLabel.setText("SUCCESS! Logged on as " + userDTO.getName());
+								currentUserDTO = userDTO;
 								loadDashboard();
 							}
 						});
@@ -196,16 +201,14 @@ public class GaredoPCR implements EntryPoint {
 //				signupButton.setEnabled(false);
 				
 				userService.createUser(textToServer,
-						new AsyncCallback<User>() {
+						new AsyncCallback<Integer>() {
 					
 							public void onFailure(Throwable caught) {
 								errorLabel.setText(caught.getMessage());
 							}
 
-							public void onSuccess(User user) {
-								errorLabel.setText("SUCCESS! Created user: " + user.getName());
-								currentUser = user;
-								loadDashboard();
+							public void onSuccess(Integer id) {
+								errorLabel.setText("SUCCESS! Created user with id: " + id);
 							}
 						});
 			}
@@ -226,29 +229,56 @@ public class GaredoPCR implements EntryPoint {
 	    RootPanel.get().clear();
 	    
 	    // main page layout
-	    final HorizontalPanel dashboardPanel = new HorizontalPanel();
 	    RootPanel.get().add(dashboardPanel);
-	    
-	    final VerticalPanel profilePanel = new VerticalPanel();
-	    final VerticalPanel projectPanel = new VerticalPanel();
 	    dashboardPanel.add(profilePanel);
 	    dashboardPanel.add(projectPanel);
+	    
+	    userService.loadProfile(currentUserDTO.getProfileId(),
+	    		new AsyncCallback<Profile>() {
+			
+			public void onFailure(Throwable caught) {
+				errorLabel.setText(caught.getMessage());
+			}
+
+			public void onSuccess(Profile profile) {
+				// not null
+				currentProfile = profile;
+				addProfileInformation();
+			}
+		});
+	    
+	    addProjectInformation();
+	    
+//	    userService.loadProjects(currentUserDTO.getId(),
+//	    		new AsyncCallback<Profile>() {
+//			
+//			public void onFailure(Throwable caught) {
+//				//errorLabel.setText(caught.getMessage());
+//			}
+//
+//			public void onSuccess(Profile profile) {
+//				// not null
+//				addProfileInformation(profile);
+//			}
+//		});
+	    
+	}
+	
+	private void addProfileInformation() {
 	    
 	    final Label profileLabel = new Label("Profile:");
 	    profilePanel.add(profileLabel);
 	    
 	    final Button saveProfileButton = new Button("Save");
 	    profilePanel.add(saveProfileButton);
-	    
-	    Profile profile = currentUser.getProfile();
-	    
+		
 	    final HorizontalPanel birthDatePanel = new HorizontalPanel();
 	    profilePanel.add(birthDatePanel);
 	    final Label birthDateLabel = new Label("Birth Date");
 		final TextBox birthDateField = new TextBox();
 		String birthDateString = "";
-		if(profile.getBirthDate() != null) {
-			birthDateString = profile.getBirthDate().toString();
+		if(currentProfile.getBirthDate() != null) {
+			birthDateString = currentProfile.getBirthDate().toString();
 		}
 		birthDateField.setText(birthDateString);
 	    birthDatePanel.add(birthDateLabel);
@@ -257,18 +287,49 @@ public class GaredoPCR implements EntryPoint {
 	    final Button addQualificationButton = new Button("Add Qualification");
 	    profilePanel.add(addQualificationButton);
 	    
-	    final Grid qualificationGrid = new Grid(profile.getQualifications().size(),2);
-	    List<String> qualifications = profile.getQualifications();
+	    final Grid qualificationGrid = new Grid(currentProfile.getQualifications().size(),2);
+	    List<String> qualifications = currentProfile.getQualifications();
 	    for(int i=0; i<qualifications.size(); i++) {
 	    	qualificationGrid.setText(i,0,"Qualification: ");
 	    	qualificationGrid.setText(i,1,qualifications.get(i));
 	    }
 	    profilePanel.add(qualificationGrid);
 	    
-	    final Label projectsLabel = new Label("Projects:");
+	 
+ 		class SaveProfileHandler implements ClickHandler {
+ 			public void onClick(ClickEvent event) {
+ 				updateProfile();
+ 			}
+
+ 			private void updateProfile() {
+ 				String birthDateString = birthDateField.getText();
+ 				//TODO: input validation
+ 				currentProfile.setBirthDate(Date.valueOf(birthDateString));
+ 				// note: new qualifications may have been added to object
+ 				userService.updateProfile(currentProfile,
+ 						new AsyncCallback<Void>() {
+ 					
+ 							public void onFailure(Throwable caught) {
+ 								//TODO: error handling
+ 								errorLabel.setText(caught.getMessage());
+ 							}
+
+ 							public void onSuccess(Void empty) {
+ 								errorLabel.setText("SUCCESS! Updated profile with id: " + currentProfile.getId());
+ 							}
+ 						});
+ 			}
+ 			
+ 		}
+ 		
+ 		SaveProfileHandler saveProfileHandler = new SaveProfileHandler();
+		saveProfileButton.addClickHandler(saveProfileHandler);
+		
+	}
+	
+	private void addProjectInformation() {
+		final Label projectsLabel = new Label("Projects:");
 	    projectPanel.add(projectsLabel);
-	    
-	    //RootPanel.get().add("User: " + currentUser.getName());
 	}
 	
 }

@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 
 import java.sql.Date;
@@ -15,6 +16,10 @@ import java.util.List;
 import java.util.ArrayList;
 
 @Entity
+@NamedQuery(
+	name = "getProfileById",
+	query = "SELECT p FROM Profile p WHERE p.id = :id"
+)
 public class Profile implements Serializable, IsSerializable {
 
 	private static final long serialVersionUID = 1337L;
@@ -23,8 +28,8 @@ public class Profile implements Serializable, IsSerializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 	
-	@OneToOne(mappedBy = "profile")
-	private User user;
+//	@OneToOne(mappedBy = "profile")
+//	private User user;
 	
 	private Date birthDate;
 	private List<String> qualifications = new ArrayList<String>();
@@ -41,13 +46,13 @@ public class Profile implements Serializable, IsSerializable {
 	// Getters and Setters //
 	//---------------------//
 	
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
+//	public User getUser() {
+//		return user;
+//	}
+//
+//	public void setUser(User user) {
+//		this.user = user;
+//	}
 
 	public Date getBirthDate() {
 		return birthDate;
@@ -63,6 +68,10 @@ public class Profile implements Serializable, IsSerializable {
 
 	public List<String> getQualifications() {
 		return qualifications;
+	}
+	
+	public void setQualifications(List<String> qualifications) {
+		this.qualifications = qualifications;
 	}
 	
 	public void addQualification(String qualification) {

@@ -8,7 +8,9 @@ import javax.persistence.TypedQuery;
 
 import org.eclipse.persistence.exceptions.DatabaseException;
 
+import de.uni_mannheim.bwl.schader.odm.garedo.client.model.Profile;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.User;
+import de.uni_mannheim.bwl.schader.odm.garedo.client.model.DTO.UserDTO;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService;
 import de.uni_mannheim.bwl.schader.odm.garedo.shared.FieldVerifier;
 
@@ -41,19 +43,34 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 //				+ ".<br><br>It looks like you are using:<br>" + userAgent;
 //	}
 	
-	public User loadUser(String name) throws IllegalArgumentException {
-		User user = getUserByName(name);
+	//-----------//
+	// User CRUD //
+	//-----------//
+	
+	public UserDTO loadUser(int id) throws IllegalArgumentException {
+		User user = getUserById(id);
+		
 		if(user == null) {
 			//TODO: use specific exception
 			throw new IllegalArgumentException("ERROR: user does not exist");
+		} else {
+			return new UserDTO(user);
 		}
-		return user;
 	}
 	
-	public User createUser(String name) throws IllegalArgumentException {
-		
+	public UserDTO loadUser(String name) throws IllegalArgumentException {
 		User user = getUserByName(name);
 		
+		if(user == null) {
+			//TODO: use specific exception
+			throw new IllegalArgumentException("ERROR: user does not exist");
+		} else {
+			return new UserDTO(user);
+		}
+	}
+	
+	public int createUser(String name) throws IllegalArgumentException {
+		User user = getUserByName(name);
 		if(user != null) {
 			throw new IllegalArgumentException("ERROR: user already exists");
 		} else {
@@ -74,7 +91,7 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 			}
 		}
 		
-		return user;
+		return user.getId();
 	}
 	
 	public void updateUser(User user) throws IllegalArgumentException {
@@ -94,13 +111,13 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 		}
 	}
 	
-	public void deleteUser(User user) throws IllegalArgumentException {
+	public void deleteUser(int id) throws IllegalArgumentException {
+		User user = getUserById(id);
 		EntityManager em = EMFHelper.getFactory().createEntityManager();
 		EntityTransaction tx = em.getTransaction();
 		
 		try {
 			tx.begin();
-			user = em.merge(user);
 			em.remove(user);
 			tx.commit();
 		} catch(EntityExistsException e) {
@@ -111,6 +128,55 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 			em.close();
 		}
 	}
+	
+	//--------------//
+	// Profile  RU  //
+	//--------------//
+	
+	public Profile loadProfile(int id) throws IllegalArgumentException {
+		return getProfileById(id);
+	}
+	
+	public void updateProfile(Profile profile) throws IllegalArgumentException {
+		EntityManager em = EMFHelper.getFactory().createEntityManager();
+		EntityTransaction tx = em.getTransaction();
+		
+		Profile persistentProfile = em.find(Profile.class, profile.getId());
+		
+		try {
+			tx.begin();
+			persistentProfile.setBirthDate(profile.getBirthDate());
+			persistentProfile.setQualifications(profile.getQualifications());
+			em.persist(persistentProfile);
+			tx.commit();
+		} catch(EntityExistsException e) {
+			//TODO: improve exception handling
+			tx.rollback();
+			throw e;
+		} finally {
+			em.close();
+		}
+	}
+	
+	//-------------------//
+	// Private Functions //
+	//-------------------//
+	
+	private User getUserById(int id) {
+		//TODO: change to em.find
+		User user = null;
+		EntityManager em = EMFHelper.getFactory().createEntityManager();
+		TypedQuery<User> query = em.createNamedQuery("getUserById",User.class);
+		query.setParameter("id", id);
+		try {
+			user = query.getSingleResult();
+		} catch(NoResultException e) {
+			// allright, no result, return null
+		} finally {
+			em.close();
+		}
+		return user;
+	}	
 	
 	private User getUserByName(String name) {
 		User user = null;
@@ -126,6 +192,25 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 		}
 		return user;
 	}	
+	
+	private Profile getProfileById(int id) {
+		//TODO: change to em.find
+		Profile profile = null;
+		EntityManager em = EMFHelper.getFactory().createEntityManager();
+		TypedQuery<Profile> query = em.createNamedQuery("getProfileById",Profile.class);
+		query.setParameter("id", id);
+		try {
+			profile = query.getSingleResult();
+		} catch(NoResultException e) {
+			//TODO: maybe improve exception handling
+			throw e;
+		} finally {
+			em.close();
+		}
+		return profile;
+	}
+	
+}
 
 //	/**
 //	 * Escape an html string. Escaping data received from the client helps to
@@ -141,4 +226,3 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 //		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
 //				.replaceAll(">", "&gt;");
 //	}
-}
