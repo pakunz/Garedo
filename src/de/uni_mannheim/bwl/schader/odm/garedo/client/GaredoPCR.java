@@ -1,5 +1,6 @@
 package de.uni_mannheim.bwl.schader.odm.garedo.client;
 
+import de.uni_mannheim.bwl.schader.odm.garedo.client.model.User;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserServiceAsync;
 import de.uni_mannheim.bwl.schader.odm.garedo.shared.FieldVerifier;
@@ -35,7 +36,7 @@ public class GaredoPCR implements EntryPoint {
 	/**
 	 * Create a remote service proxy to talk to the server-side Greeting service.
 	 */
-	private final UserServiceAsync greetingService = GWT
+	private final UserServiceAsync userService = GWT
 			.create(UserService.class);
 
 	/**
@@ -122,8 +123,8 @@ public class GaredoPCR implements EntryPoint {
 				sendButton.setEnabled(false);
 				textToServerLabel.setText(textToServer);
 				serverResponseLabel.setText("");
-				greetingService.greetServer(textToServer,
-						new AsyncCallback<String>() {
+				userService.loadUser(textToServer,
+						new AsyncCallback<User>() {
 							public void onFailure(Throwable caught) {
 								// Show the RPC error message to the user
 								dialogBox
@@ -135,11 +136,11 @@ public class GaredoPCR implements EntryPoint {
 								closeButton.setFocus(true);
 							}
 
-							public void onSuccess(String result) {
+							public void onSuccess(User user) {
 								dialogBox.setText("Remote Procedure Call");
 								serverResponseLabel
 										.removeStyleName("serverResponseLabelError");
-								serverResponseLabel.setHTML(result);
+								serverResponseLabel.setHTML(user.getName());
 								dialogBox.center();
 								closeButton.setFocus(true);
 							}

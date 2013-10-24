@@ -13,7 +13,7 @@
   
   <servlet-mapping>
     <servlet-name>greetServlet</servlet-name>
-    <url-pattern>/garedopcr/greet</url-pattern>
+    <url-pattern>/garedopcr/user</url-pattern>
   </servlet-mapping>
   
   <!-- Default page to serve -->
