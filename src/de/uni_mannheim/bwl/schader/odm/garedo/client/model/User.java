@@ -15,6 +15,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -35,18 +36,17 @@ public class User implements Serializable, IsSerializable {
 	private String name;
 	
 	@OneToOne(cascade = CascadeType.ALL)
-	private Profile profile;
+	private Profile profile = new Profile();
 	
-//	@ManyToMany(cascade = CascadeType.PERSIST)
-//	private Set<Project> projects;
+	@ManyToMany(cascade = CascadeType.PERSIST)
+	private Set<Project> projects = new HashSet<Project>();
 	
 	//--------------//
 	// Constructors //
 	//--------------//
 	
 	public User() {
-		super();
-//		this.projects = new HashSet<Project>();
+		//super();
 	}
 
 	public User(String name) {
@@ -78,22 +78,22 @@ public class User implements Serializable, IsSerializable {
 		return id;
 	}
 
-//	public Set<Project> getProjects() {
-//		return projects;
-//	}
+	public Set<Project> getProjects() {
+		return projects;
+	}
 	
-//	public void addProject(Project project) {
-//		this.projects.add(project);
-//		if(!project.getUsers().contains(this)) {
-//			project.addUser(this);
-//		}
-//	}
+	public void addProject(Project project) {
+		this.projects.add(project);
+		if(!project.getUsers().contains(this)) {
+			project.addUser(this);
+		}
+	}
 	
-//	public void removeProject(Project project) {
-//		this.projects.remove(project);
-//		if(project.getUsers().contains(this)) {
-//			project.removeUser(this);
-//		}
-//	}
+	public void removeProject(Project project) {
+		this.projects.remove(project);
+		if(project.getUsers().contains(this)) {
+			project.removeUser(this);
+		}
+	}
 	
 }

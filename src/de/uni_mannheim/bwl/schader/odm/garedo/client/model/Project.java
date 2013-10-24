@@ -31,16 +31,15 @@ public class Project implements Serializable, IsSerializable  {
 	@Column(unique = true)
 	private String name;
 	
-//	@ManyToMany(mappedBy = "projects")
-//	private Set<User> users;
+	@ManyToMany(mappedBy = "projects", cascade = CascadeType.PERSIST)
+	private Set<User> users = new HashSet<User>();
 
 	//--------------//
 	// Constructors //
 	//--------------//
 	
 	public Project() {
-		super();
-//		this.users = new HashSet<User>();
+		//super();
 	}
 	
 	public Project(String name) {
@@ -64,22 +63,22 @@ public class Project implements Serializable, IsSerializable  {
 		return id;
 	}
 
-//	public Set<User> getUsers() {
-//		return users;
-//	}
+	public Set<User> getUsers() {
+		return users;
+	}
 	
-//	public void addUser(User user) {
-//		this.users.add(user);
-//		if(!user.getProjects().contains(this)) {
-//			user.addProject(this);
-//		}
-//	}
+	public void addUser(User user) {
+		this.users.add(user);
+		if(!user.getProjects().contains(this)) {
+			user.addProject(this);
+		}
+	}
 	
-//	public void removeUser(User user) {
-//		this.users.remove(user);
-//		if(user.getProjects().contains(this)) {
-//			user.removeProject(this);
-//		}
-//	}
+	public void removeUser(User user) {
+		this.users.remove(user);
+		if(user.getProjects().contains(this)) {
+			user.removeProject(this);
+		}
+	}
 	
 }

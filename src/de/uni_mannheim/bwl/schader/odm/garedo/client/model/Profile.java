@@ -27,15 +27,14 @@ public class Profile implements Serializable, IsSerializable {
 	private User user;
 	
 	private Date birthDate;
-	private List<String> qualifications;
+	private List<String> qualifications = new ArrayList<String>();
 	
 	//--------------//
 	// Constructors //
 	//--------------//
 	
 	public Profile() {
-		super();
-		this.qualifications = new ArrayList<String>();
+		//super();
 	}
 
 	//---------------------//

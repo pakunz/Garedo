@@ -1,5 +1,8 @@
 package de.uni_mannheim.bwl.schader.odm.garedo.client;
 
+import java.util.List;
+
+import de.uni_mannheim.bwl.schader.odm.garedo.client.model.Profile;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.User;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserServiceAsync;
@@ -15,6 +18,7 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -232,6 +236,34 @@ public class GaredoPCR implements EntryPoint {
 	    
 	    final Label profileLabel = new Label("Profile:");
 	    profilePanel.add(profileLabel);
+	    
+	    final Button saveProfileButton = new Button("Save");
+	    profilePanel.add(saveProfileButton);
+	    
+	    Profile profile = currentUser.getProfile();
+	    
+	    final HorizontalPanel birthDatePanel = new HorizontalPanel();
+	    profilePanel.add(birthDatePanel);
+	    final Label birthDateLabel = new Label("Birth Date");
+		final TextBox birthDateField = new TextBox();
+		String birthDateString = "";
+		if(profile.getBirthDate() != null) {
+			birthDateString = profile.getBirthDate().toString();
+		}
+		birthDateField.setText(birthDateString);
+	    birthDatePanel.add(birthDateLabel);
+	    birthDatePanel.add(birthDateField);
+	    
+	    final Button addQualificationButton = new Button("Add Qualification");
+	    profilePanel.add(addQualificationButton);
+	    
+	    final Grid qualificationGrid = new Grid(profile.getQualifications().size(),2);
+	    List<String> qualifications = profile.getQualifications();
+	    for(int i=0; i<qualifications.size(); i++) {
+	    	qualificationGrid.setText(i,0,"Qualification: ");
+	    	qualificationGrid.setText(i,1,qualifications.get(i));
+	    }
+	    profilePanel.add(qualificationGrid);
 	    
 	    final Label projectsLabel = new Label("Projects:");
 	    projectPanel.add(projectsLabel);
