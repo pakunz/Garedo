@@ -224,6 +224,7 @@ public class GaredoPCR implements EntryPoint {
 		signupField.addKeyUpHandler(signupHandler);
 	}
 	
+	
 	private void loadDashboard() {
 		
 	    RootPanel.get().clear();
@@ -284,8 +285,8 @@ public class GaredoPCR implements EntryPoint {
 	    birthDatePanel.add(birthDateLabel);
 	    birthDatePanel.add(birthDateField);
 	    
-	    final Button addQualificationButton = new Button("Add Qualification");
-	    profilePanel.add(addQualificationButton);
+	    final Button showAddQualificationButton = new Button("Add Qualification");
+	    profilePanel.add(showAddQualificationButton);
 	    
 	    final Grid qualificationGrid = new Grid(currentProfile.getQualifications().size(),2);
 	    List<String> qualifications = currentProfile.getQualifications();
@@ -324,6 +325,66 @@ public class GaredoPCR implements EntryPoint {
  		
  		SaveProfileHandler saveProfileHandler = new SaveProfileHandler();
 		saveProfileButton.addClickHandler(saveProfileHandler);
+		
+		
+		// ADD QUALIFICATION POPUP
+		final DialogBox addQualificationBox = new DialogBox();
+		addQualificationBox.setText("Add Qualification");
+		addQualificationBox.setAnimationEnabled(true);
+		
+		final Button addQualificationButton = new Button("Add");
+		addQualificationButton.getElement().setId("addQualificationButton");
+		
+		final Label addQualificationLabel = new Label("Qualification:");
+		final TextBox addQualificationField = new TextBox();
+		VerticalPanel addQualificationBoxPanel = new VerticalPanel();
+		addQualificationBoxPanel.addStyleName("addQualificationBoxPanel");
+		addQualificationBoxPanel.add(addQualificationLabel);
+		addQualificationBoxPanel.add(addQualificationField);
+		addQualificationBoxPanel.setHorizontalAlignment(VerticalPanel.ALIGN_RIGHT);
+		addQualificationBoxPanel.add(addQualificationButton);
+		addQualificationBox.setWidget(addQualificationBoxPanel);
+
+		class AddQualificationHandler implements ClickHandler {
+ 			public void onClick(ClickEvent event) {
+ 				addQualification();
+ 			}
+
+ 			private void addQualification() {
+ 				String qualification = addQualificationField.getText();
+ 				currentProfile.addQualification(qualification);
+ 				updateQualificationGrid(qualification);
+ 				addQualificationBox.hide();
+ 			}
+ 			
+ 			private void updateQualificationGrid(String qualification) {
+ 				int rowCount = qualificationGrid.getRowCount();
+ 				qualificationGrid.resizeRows(rowCount + 1);
+ 				qualificationGrid.setText(rowCount, 0, "Qualification: ");
+ 				qualificationGrid.setText(rowCount, 1, qualification);
+ 				
+ 			}
+ 			
+ 		}
+		
+		AddQualificationHandler addQualificationHandler = new AddQualificationHandler();
+		addQualificationButton.addClickHandler(addQualificationHandler);
+		
+		class ShowAddQualificationHandler implements ClickHandler {
+ 			public void onClick(ClickEvent event) {
+ 				showAddQualification();
+ 			}
+
+ 			private void showAddQualification() {
+ 				addQualificationBox.setText("Add Qualification");
+				addQualificationBox.center();
+				addQualificationButton.setFocus(true);
+ 			}
+ 			
+ 		}
+ 		
+		ShowAddQualificationHandler showAddQualificationHandler = new ShowAddQualificationHandler();
+		showAddQualificationButton.addClickHandler(showAddQualificationHandler);
 		
 	}
 	
