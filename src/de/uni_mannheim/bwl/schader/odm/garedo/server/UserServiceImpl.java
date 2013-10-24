@@ -6,6 +6,8 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
+import org.eclipse.persistence.exceptions.DatabaseException;
+
 import de.uni_mannheim.bwl.schader.odm.garedo.client.model.User;
 import de.uni_mannheim.bwl.schader.odm.garedo.client.services.UserService;
 import de.uni_mannheim.bwl.schader.odm.garedo.shared.FieldVerifier;
@@ -49,22 +51,27 @@ public class UserServiceImpl extends RemoteServiceServlet implements
 	}
 	
 	public User createUser(String name) throws IllegalArgumentException {
-		User user = null;
 		
-		EntityManager em = EMFHelper.getFactory().createEntityManager();
-		EntityTransaction tx = em.getTransaction();
+		User user = getUserByName(name);
 		
-		try {
-			tx.begin();
-			user = new User(name);
-			em.persist(user);
-			tx.commit();
-		} catch(EntityExistsException e) {
-			//TODO: improve exception handling
-			tx.rollback();
-			throw e;
-		} finally {
-			em.close();
+		if(user != null) {
+			throw new IllegalArgumentException("ERROR: user already exists");
+		} else {
+			EntityManager em = EMFHelper.getFactory().createEntityManager();
+			EntityTransaction tx = em.getTransaction();
+			
+			try {
+				tx.begin();
+				user = new User(name);
+				em.persist(user);
+				tx.commit();
+			} catch(DatabaseException e) {
+				//TODO: improve exception handling, should not depend on exception but be sanitized before
+				tx.rollback();
+				throw new IllegalArgumentException(e);
+			} finally {
+				em.close();
+			}
 		}
 		
 		return user;

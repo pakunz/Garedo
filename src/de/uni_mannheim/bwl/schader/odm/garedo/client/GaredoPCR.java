@@ -16,6 +16,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -39,10 +40,17 @@ public class GaredoPCR implements EntryPoint {
 	private final UserServiceAsync userService = GWT
 			.create(UserService.class);
 
+	private User currentUser;
+	
 	/**
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
+		currentUser = null;
+		loadLogin();
+	}
+	
+	private void loadLogin() {
 		
 		final Button loginButton = new Button("Log In");
 		final TextBox loginField = new TextBox();
@@ -129,8 +137,8 @@ public class GaredoPCR implements EntryPoint {
 //				}
 
 				// Then, we send the input to the server.
-				loginButton.setEnabled(false);
-				signupButton.setEnabled(false);
+//				loginButton.setEnabled(false);
+//				signupButton.setEnabled(false);
 //				textToServerLabel.setText(textToServer);
 //				serverResponseLabel.setText("");
 				
@@ -157,8 +165,8 @@ public class GaredoPCR implements EntryPoint {
 //								dialogBox.center();
 //								closeButton.setFocus(true);
 								errorLabel.setText("SUCCESS! Logged on as " + user.getName());
-								loginButton.setEnabled(true);
-								signupButton.setEnabled(true);
+								currentUser = user;
+								loadDashboard();
 							}
 						});
 			}
@@ -178,10 +186,10 @@ public class GaredoPCR implements EntryPoint {
 
 			private void signup() {
 				errorLabel.setText("");
-				String textToServer = loginField.getText();
+				String textToServer = signupField.getText();
 
-				loginButton.setEnabled(false);
-				signupButton.setEnabled(false);
+//				loginButton.setEnabled(false);
+//				signupButton.setEnabled(false);
 				
 				userService.createUser(textToServer,
 						new AsyncCallback<User>() {
@@ -192,8 +200,8 @@ public class GaredoPCR implements EntryPoint {
 
 							public void onSuccess(User user) {
 								errorLabel.setText("SUCCESS! Created user: " + user.getName());
-								loginButton.setEnabled(true);
-								signupButton.setEnabled(true);
+								currentUser = user;
+								loadDashboard();
 							}
 						});
 			}
@@ -208,4 +216,27 @@ public class GaredoPCR implements EntryPoint {
 		signupButton.addClickHandler(signupHandler);
 		signupField.addKeyUpHandler(signupHandler);
 	}
+	
+	private void loadDashboard() {
+		
+	    RootPanel.get().clear();
+	    
+	    // main page layout
+	    final HorizontalPanel dashboardPanel = new HorizontalPanel();
+	    RootPanel.get().add(dashboardPanel);
+	    
+	    final VerticalPanel profilePanel = new VerticalPanel();
+	    final VerticalPanel projectPanel = new VerticalPanel();
+	    dashboardPanel.add(profilePanel);
+	    dashboardPanel.add(projectPanel);
+	    
+	    final Label profileLabel = new Label("Profile:");
+	    profilePanel.add(profileLabel);
+	    
+	    final Label projectsLabel = new Label("Projects:");
+	    projectPanel.add(projectsLabel);
+	    
+	    //RootPanel.get().add("User: " + currentUser.getName());
+	}
+	
 }
